@@ -1,5 +1,6 @@
 import streamlit as st
 import google.generativeai as genai
+from docx import Document
 
 st.set_page_config(page_title="Synthium FAQ Bot")
 
@@ -9,9 +10,16 @@ genai.configure(api_key=api_key)
 
 model = genai.GenerativeModel("gemini-2.5-flash")
 
-DOCUMENTATION = """
-PASTE YOUR SYNTHIUM DOCUMENTATION HERE
-"""
+def load_document():
+    doc = Document("Synthium_FAQ_Bot_Document.docx")
+    text = ""
+
+    for para in doc.paragraphs:
+        text += para.text + "\n"
+
+    return text
+
+DOCUMENTATION = load_document()
 
 st.title("🤖 Synthium FAQ Bot")
 
@@ -22,10 +30,12 @@ if question:
     prompt = f"""
     You are the official FAQ assistant for Synthium.
 
-    Answer ONLY using the documentation below.
+    Answer ONLY from the provided documentation.
 
-    If the answer is not present, say:
-    'I couldn't find that information in the documentation.'
+    If the answer is not available in the documentation,
+    reply:
+
+    "I couldn't find that information in the Synthium documentation."
 
     Documentation:
     {DOCUMENTATION}
