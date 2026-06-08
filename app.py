@@ -2,48 +2,72 @@ import streamlit as st
 import google.generativeai as genai
 from docx import Document
 
-st.set_page_config(page_title="Synthium FAQ Bot")
+# Page Configuration
+st.set_page_config(
+    page_title="Synthium FAQ Bot",
+    page_icon="🤖"
+)
 
-api_key = st.secrets["AQ.Ab8RN6IS_9spA6jIrdIzDCqRSiIOfAFF6fs2rne_PGTEwRlQGA"]
+# Gemini API Key from Streamlit Secrets
+api_key = st.secrets["GEMINI_API_KEY"]
 
+# Configure Gemini
 genai.configure(api_key=api_key)
 
+# Load Gemini Model
 model = genai.GenerativeModel("gemini-2.5-flash")
 
+# Read Documentation
+@st.cache_data
 def load_document():
     doc = Document("Synthium_FAQ_Bot_Document.docx")
+
     text = ""
 
     for para in doc.paragraphs:
-        text += para.text + "\n"
+        if para.text.strip():
+            text += para.text + "\n"
 
     return text
 
 DOCUMENTATION = load_document()
 
+# UI
 st.title("🤖 Synthium FAQ Bot")
+st.write("Ask any question about Synthium Creative Suite.")
 
-question = st.text_input("Ask a question about Synthium")
+question = st.text_input(
+    "Enter your question:",
+    placeholder="Example: How do I create a new document?"
+)
 
 if question:
 
-    prompt = f"""
-    You are the official FAQ assistant for Synthium.
+    with st.spinner("Searching documentation..."):
 
-    Answer ONLY from the provided documentation.
+        prompt = f"""
+You are the official FAQ Assistant for Synthium Creative Suite.
 
-    If the answer is not available in the documentation,
-    reply:
+IMPORTANT RULES:
+1. Answer ONLY using the provided documentation.
+2. Do NOT make up information.
+3. Do NOT assume anything not present in the documentation.
+4. If the answer is not found, respond exactly:
 
-    "I couldn't find that information in the Synthium documentation."
+I couldn't find that information in the Synthium documentation.
 
-    Documentation:
-    {DOCUMENTATION}
+Documentation:
+{DOCUMENTATION}
 
-    User Question:
-    {question}
-    """
+User Question:
+{question}
+"""
 
-    response = model.generate_content(prompt)
+        try:
+            response = model.generate_content(prompt)
 
-    st.write(response.text)
+            st.success("Answer")
+            st.write(response.text)
+
+        except Exception as e:
+            st.error(f"Error: {str(e)}")
