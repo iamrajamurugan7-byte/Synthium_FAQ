@@ -4,7 +4,7 @@ from docx import Document
 
 st.set_page_config(page_title="Synthium FAQ Bot")
 
-api_key = st.secrets["GEMINI_API_KEY"]
+api_key = st.secrets["AQ.Ab8RN6IS_9spA6jIrdIzDCqRSiIOfAFF6fs2rne_PGTEwRlQGA"]
 
 genai.configure(api_key=api_key)
 
